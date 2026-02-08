@@ -30,11 +30,19 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            height: 100dvh;
+            height: 100vh;
             overflow: hidden;
             background-color: var(--color-bg);
             font-family: var(--font-family);
-            position: fixed;
+        }
+
+        @supports (height: 100dvh) {
+
+            html,
+            body {
+                height: 100dvh;
+            }
         }
 
         #app {
@@ -44,7 +52,6 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            position: relative;
             background-color: #fff;
             overflow: hidden;
         }
@@ -376,7 +383,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="version-info">v1.0.2</div>
+            <div class="version-info">v1.0.3</div>
         </div>
     </div>
 
@@ -445,7 +452,6 @@
                     userInput: '',
                     chatList: [],
                     isLoading: false,
-                    previousViewportHeight: 0,
                     lang: 'ko'
                 };
             },
@@ -484,46 +490,21 @@
                 },
 
                 initViewportHandler() {
-                    if (!window.visualViewport) return;
-                    if (!this.$refs.appContainer) return;
-
-                    this.previousViewportHeight = window.visualViewport.height;
-                    this.$refs.appContainer.style.height = `${this.previousViewportHeight}px`;
-
-                    window.visualViewport.addEventListener('resize', () => this.handleViewportResize());
-                    window.visualViewport.addEventListener('scroll', () => this.handleViewportScroll());
+                    if (!this.$refs.chatInput) return;
 
                     this.$refs.chatInput.addEventListener('focus', () => {
                         setTimeout(() => this.scrollToBottom(true), 100);
                         setTimeout(() => this.scrollToBottom(true), 300);
                         setTimeout(() => this.scrollToBottom(true), 500);
                     });
-                },
 
-                handleViewportResize() {
-                    const vv = window.visualViewport;
-                    if (!vv || !this.$refs.appContainer) return;
-
-                    const currentHeight = vv.height;
-
-                    this.$refs.appContainer.style.height = `${currentHeight}px`;
-                    this.$refs.appContainer.style.transform = `translateY(${vv.offsetTop}px)`;
-
-                    document.body.scrollTop = 0;
-                    document.documentElement.scrollTop = 0;
-
-                    this.scrollToBottom(true);
-                    setTimeout(() => this.scrollToBottom(true), 50);
-                    setTimeout(() => this.scrollToBottom(true), 150);
-                    setTimeout(() => this.scrollToBottom(true), 300);
-
-                    this.previousViewportHeight = currentHeight;
-                },
-
-                handleViewportScroll() {
-                    const vv = window.visualViewport;
-                    if (!vv || !this.$refs.appContainer) return;
-                    this.$refs.appContainer.style.transform = `translateY(${vv.offsetTop}px)`;
+                    if (window.visualViewport) {
+                        window.visualViewport.addEventListener('resize', () => {
+                            this.scrollToBottom(true);
+                            setTimeout(() => this.scrollToBottom(true), 100);
+                            setTimeout(() => this.scrollToBottom(true), 300);
+                        });
+                    }
                 },
 
                 getMessageRowClass(type) {
