@@ -493,16 +493,12 @@
                     if (!this.$refs.chatInput) return;
 
                     this.$refs.chatInput.addEventListener('focus', () => {
-                        setTimeout(() => this.scrollToBottom(true), 100);
-                        setTimeout(() => this.scrollToBottom(true), 300);
-                        setTimeout(() => this.scrollToBottom(true), 500);
+                        this.scrollToBottom(true);
                     });
 
                     if (window.visualViewport) {
                         window.visualViewport.addEventListener('resize', () => {
                             this.scrollToBottom(true);
-                            setTimeout(() => this.scrollToBottom(true), 100);
-                            setTimeout(() => this.scrollToBottom(true), 300);
                         });
                     }
                 },
