@@ -178,7 +178,10 @@
                     window.visualViewport.addEventListener('resize', () => {
                         this.$refs.appContainer.style.height = `${window.visualViewport.height}px`;
                         window.scrollTo(0, 0);
-                        this.scrollToBottom();
+
+                        setTimeout(() => {
+                            this.scrollToBottom(true);
+                        }, 100);
                     });
                 }
             },
@@ -190,9 +193,11 @@
                     this.userInput = '';
                     this.scrollToBottom();
                     this.isLoading = true;
+
                     this.$nextTick(() => {
                         this.$refs.chatInput.focus();
                     });
+
                     setTimeout(() => {
                         this.chatList.push({ text: userText, type: 'assistant' });
                         this.isLoading = false;
@@ -202,10 +207,14 @@
                         });
                     }, 800);
                 },
-                scrollToBottom() {
+
+                scrollToBottom(instant = false) {
                     this.$nextTick(() => {
                         const container = this.$refs.chatWindow;
-                        container.scrollTop = container.scrollHeight;
+                        container.scrollTo({
+                            top: container.scrollHeight,
+                            behavior: instant ? 'auto' : 'smooth'
+                        });
                     });
                 }
             }
