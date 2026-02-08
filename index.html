@@ -474,6 +474,14 @@
                 setLang(newLang) {
                     this.lang = newLang;
                     document.documentElement.lang = newLang;
+                    this.updateWelcomeMessage();
+                },
+
+                updateWelcomeMessage() {
+                    // Update the first welcome message if it exists
+                    if (this.chatList.length > 0 && this.chatList[0].isWelcome) {
+                        this.chatList[0].text = i18n[this.lang].welcomeMessage;
+                    }
                 },
 
                 showWelcomeMessage() {
