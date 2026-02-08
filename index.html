@@ -14,10 +14,7 @@
             --color-bubble-ai: #fff9c4;
             --color-bubble-user: #e1f5fe;
             --color-text: #5d4037;
-            --color-border: #ffc107;
-            --color-input-bg: #ffffff;
-            --color-input-focus: #ffb300;
-            --color-accent: #ff9800;
+            --color-accent: #ffb300;
             --font-family: 'Noto Sans KR', sans-serif;
             --bubble-radius: 18px;
             --input-radius: 24px;
@@ -47,11 +44,9 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            position: relative;
-            background-color: #ffffff;
+            background-color: #fff;
         }
 
-        /* Header with Duck */
         .header {
             display: flex;
             align-items: center;
@@ -67,7 +62,7 @@
             gap: 10px;
             font-size: 18px;
             font-weight: 700;
-            color: #5d4037;
+            color: var(--color-text);
         }
 
         .duck-icon {
@@ -105,7 +100,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
             background: transparent;
-            color: #5d4037;
+            color: var(--color-text);
             white-space: nowrap;
         }
 
@@ -131,16 +126,16 @@
             flex-direction: column;
         }
 
+        .chat-container::-webkit-scrollbar {
+            display: none;
+        }
+
         .chat-container>*:first-child {
             margin-top: auto;
         }
 
         .chat-container>* {
             flex-shrink: 0;
-        }
-
-        .chat-container::-webkit-scrollbar {
-            display: none;
         }
 
         .message-row {
@@ -205,7 +200,7 @@
 
         .input-area {
             width: 100%;
-            background-color: #ffffff;
+            background-color: #fff;
             border-top: 1px solid #eee;
             padding: 12px 15px;
             padding-bottom: calc(12px + env(safe-area-inset-bottom));
@@ -223,7 +218,7 @@
             padding: 14px 20px;
             border-radius: var(--input-radius);
             border: 1px solid #ddd;
-            background-color: var(--color-input-bg);
+            background-color: #fff;
             font-size: 16px;
             outline: none;
             transition: all 0.2s ease;
@@ -233,8 +228,7 @@
         }
 
         .input-box:focus {
-            border-color: var(--color-input-focus);
-            background-color: #fff;
+            border-color: var(--color-accent);
         }
 
         .input-box::placeholder {
@@ -246,13 +240,18 @@
             height: 48px;
             border-radius: 50%;
             border: none;
-            background-color: #ffb300;
+            background-color: var(--color-accent);
             cursor: pointer;
-            font-size: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--color-text);
         }
 
         .send-btn:hover {
@@ -274,7 +273,7 @@
             display: inline-block;
             width: 8px;
             height: 8px;
-            background-color: #ffb300;
+            background-color: var(--color-accent);
             border-radius: 50%;
             margin: 0 3px;
             animation: bounce 1.4s infinite ease-in-out both;
@@ -301,10 +300,9 @@
             }
         }
 
-        /* Welcome message styling */
         .welcome-bubble {
             background-color: #fffde7 !important;
-            border: 1px dashed #ffb300 !important;
+            border: 1px dashed var(--color-accent) !important;
         }
 
         .welcome-bubble h3 {
@@ -327,33 +325,11 @@
             margin: 8px 0 0 0;
             font-size: 14px;
         }
-
-        /* Quack animation */
-        .quack-animation {
-            animation: quack 0.5s ease-in-out;
-        }
-
-        @keyframes quack {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            25% {
-                transform: scale(1.1) rotate(-3deg);
-            }
-
-            75% {
-                transform: scale(1.1) rotate(3deg);
-            }
-        }
     </style>
 </head>
 
 <body>
     <div id="app" ref="appContainer">
-        <!-- Header -->
         <div class="header">
             <div class="header-title">
                 <span class="duck-icon">🐤</span>
@@ -365,7 +341,6 @@
             </div>
         </div>
 
-        <!-- Chat Container -->
         <div class="chat-container" ref="chatWindow">
             <div v-for="(msg, index) in chatList" :key="index" class="message-row"
                 :class="getMessageRowClass(msg.type)">
@@ -378,13 +353,15 @@
             </div>
         </div>
 
-        <!-- Input Area -->
         <div class="input-area">
             <div class="input-wrapper">
                 <input ref="chatInput" v-model="userInput" @keyup.enter="sendMessage" class="input-box"
                     :placeholder="inputPlaceholder" :disabled="isLoading">
                 <button class="send-btn" @click="sendMessage" :disabled="isLoading || !userInput.trim()">
-                    🐤
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4L12 20M12 4L6 10M12 4L18 10" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -394,16 +371,15 @@
         const { createApp } = Vue;
 
         const KEYBOARD_SCROLL_DELAY = 100;
-        const AI_RESPONSE_DELAY = 800;
+        const AI_RESPONSE_DELAY = 1000;
 
-        // Localized content
         const i18n = {
             ko: {
-                headerTitle: '러버덕',
+                headerTitle: '덕구',
                 placeholder: '무엇이든 물어보세요! 🐤',
                 welcomeMessage: `
                     <h3>🐤 피-잇! 피-잇! 안녕하세요!</h3>
-                    <p>저는 당신의 <strong>러버덕 디버깅 친구</strong>예요!</p>
+                    <p>저는 당신의 디버깅 친구 <strong>덕구</strong>예요!</p>
                     <ul>
                         <li>🔍 코딩하다 막힐 때 저에게 설명해보세요</li>
                         <li>💡 문제를 말로 설명하면 해결책이 보일 거예요</li>
@@ -424,11 +400,11 @@
                 ]
             },
             en: {
-                headerTitle: 'Rubber Duck',
+                headerTitle: 'Duck-Gu',
                 placeholder: 'Ask me anything! 🐤',
                 welcomeMessage: `
                     <h3>🐤 Quack Quack! Hello there!</h3>
-                    <p>I'm your <strong>Rubber Duck Debugging buddy</strong>!</p>
+                    <p>I'm your Debugging buddy <strong>Duck-Gu</strong>!</p>
                     <ul>
                         <li>🔍 When you're stuck coding, explain it to me</li>
                         <li>💡 Speaking your problem out loud helps find solutions</li>
@@ -462,12 +438,8 @@
             },
 
             computed: {
-                headerTitle() {
-                    return i18n[this.lang].headerTitle;
-                },
-                inputPlaceholder() {
-                    return i18n[this.lang].placeholder;
-                }
+                headerTitle() { return i18n[this.lang].headerTitle; },
+                inputPlaceholder() { return i18n[this.lang].placeholder; }
             },
 
             mounted() {
@@ -483,7 +455,6 @@
                 },
 
                 updateWelcomeMessage() {
-                    // Update the first welcome message if it exists
                     if (this.chatList.length > 0 && this.chatList[0].isWelcome) {
                         this.chatList[0].text = i18n[this.lang].welcomeMessage;
                     }
@@ -499,9 +470,7 @@
 
                 initViewportHandler() {
                     if (!window.visualViewport) return;
-
                     this.previousViewportHeight = window.visualViewport.height;
-
                     window.visualViewport.addEventListener('resize', this.handleViewportResize);
                 },
 
@@ -532,7 +501,6 @@
                     this.scrollToBottom();
                     this.isLoading = true;
                     this.focusInput();
-
                     this.simulateAIResponse();
                 },
 
@@ -555,9 +523,7 @@
                 },
 
                 focusInput() {
-                    this.$nextTick(() => {
-                        this.$refs.chatInput?.focus();
-                    });
+                    this.$nextTick(() => this.$refs.chatInput?.focus());
                 },
 
                 scrollToBottom(instant = false) {
@@ -575,5 +541,3 @@
 </body>
 
 </html>
-</CodeContent>
-<parameter name="EmptyFile">false
