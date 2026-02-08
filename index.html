@@ -205,10 +205,17 @@
             background-color: #fff;
             border-top: 1px solid #eee;
             padding: 12px 15px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             flex-shrink: 0;
             position: relative;
             z-index: 10;
+        }
+
+        .version-info {
+            text-align: center;
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 8px;
         }
 
         .input-wrapper {
@@ -368,6 +375,7 @@
                     </svg>
                 </button>
             </div>
+            <div class="version-info">v1.0.0</div>
         </div>
     </div>
 
@@ -476,20 +484,33 @@
                     if (!window.visualViewport) return;
                     this.previousViewportHeight = window.visualViewport.height;
                     window.visualViewport.addEventListener('resize', this.handleViewportResize);
+                    window.visualViewport.addEventListener('scroll', this.handleViewportScroll);
                 },
 
                 handleViewportResize() {
                     const currentHeight = window.visualViewport.height;
                     const isKeyboardOpening = currentHeight < this.previousViewportHeight;
+                    const isKeyboardClosing = currentHeight > this.previousViewportHeight;
 
                     this.$refs.appContainer.style.height = `${currentHeight}px`;
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
                     window.scrollTo(0, 0);
 
                     if (isKeyboardOpening) {
                         setTimeout(() => this.scrollToBottom(true), KEYBOARD_SCROLL_DELAY);
+                        setTimeout(() => this.scrollToBottom(true), KEYBOARD_SCROLL_DELAY * 2);
+                    }
+
+                    if (isKeyboardClosing) {
+                        this.scrollToBottom(true);
                     }
 
                     this.previousViewportHeight = currentHeight;
+                },
+
+                handleViewportScroll() {
+                    window.scrollTo(0, 0);
                 },
 
                 getMessageRowClass(type) {
