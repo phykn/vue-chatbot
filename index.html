@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>My AI Chatbot</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
@@ -12,19 +13,22 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background-color: #ffffff;
             font-family: 'Noto Sans KR', sans-serif;
-            display: flex;
-            justify-content: center;
-            height: 100dvh;
-            overflow: hidden;
+            position: fixed;
         }
 
         #app {
             width: 100%;
             max-width: 800px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -36,10 +40,10 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            padding-bottom: 80px;
             scroll-behavior: smooth;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            overscroll-behavior: contain;
         }
 
         .chat-container::-webkit-scrollbar {
@@ -84,11 +88,11 @@
 
         .input-area {
             width: 100%;
-            max-width: 800px;
             background-color: rgba(255, 255, 255, 0.95);
             border-top: 1px solid #eee;
             padding: 10px 15px;
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            flex-shrink: 0;
         }
 
         .input-box {
@@ -101,6 +105,8 @@
             outline: none;
             transition: 0.3s;
             -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
         }
 
         .input-box:focus {
@@ -142,7 +148,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" ref="appContainer">
         <div class="chat-container" ref="chatWindow">
             <div v-for="(msg, index) in chatList" :key="index" class="message-row"
                 :class="msg.type === 'user' ? 'user-row' : 'ai-row'">
@@ -167,6 +173,15 @@
                     isLoading: false
                 }
             },
+            mounted() {
+                if (window.visualViewport) {
+                    window.visualViewport.addEventListener('resize', () => {
+                        this.$refs.appContainer.style.height = `${window.visualViewport.height}px`;
+                        window.scrollTo(0, 0);
+                        this.scrollToBottom();
+                    });
+                }
+            },
             methods: {
                 sendMessage() {
                     if (this.userInput.trim() === '' || this.isLoading) return;
@@ -175,6 +190,9 @@
                     this.userInput = '';
                     this.scrollToBottom();
                     this.isLoading = true;
+                    this.$nextTick(() => {
+                        this.$refs.chatInput.focus();
+                    });
                     setTimeout(() => {
                         this.chatList.push({ text: userText, type: 'assistant' });
                         this.isLoading = false;
