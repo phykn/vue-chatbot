@@ -175,13 +175,28 @@
             },
             mounted() {
                 if (window.visualViewport) {
+                    let previousHeight = window.visualViewport.height;
+
                     window.visualViewport.addEventListener('resize', () => {
-                        this.$refs.appContainer.style.height = `${window.visualViewport.height}px`;
+                        const currentHeight = window.visualViewport.height;
+                        const isKeyboardOpening = currentHeight < previousHeight;
+
+                        this.$refs.appContainer.style.height = `${currentHeight}px`;
                         window.scrollTo(0, 0);
 
-                        setTimeout(() => {
-                            this.scrollToBottom(true);
-                        }, 100);
+                        if (isKeyboardOpening) {
+                            this.$nextTick(() => {
+                                const container = this.$refs.chatWindow;
+                                const contentHeight = container.scrollHeight;
+                                const visibleHeight = container.clientHeight;
+
+                                if (contentHeight > visibleHeight) {
+                                    this.scrollToBottom(true);
+                                }
+                            });
+                        }
+
+                        previousHeight = currentHeight;
                     });
                 }
             },
