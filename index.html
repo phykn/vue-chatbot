@@ -194,7 +194,6 @@
                                         const lastMessageRect = lastMessage.getBoundingClientRect();
                                         const containerRect = container.getBoundingClientRect();
 
-                                        // 마지막 메시지가 컨테이너 하단 밖에 있으면 (가려지면) 스크롤
                                         if (lastMessageRect.bottom > containerRect.bottom) {
                                             this.scrollToBottom(true);
                                         }
