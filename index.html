@@ -89,14 +89,15 @@
 
         .lang-toggle {
             display: flex;
-            gap: 5px;
+            gap: 8px;
             background: rgba(255, 255, 255, 0.5);
-            padding: 5px;
+            padding: 6px;
             border-radius: 20px;
+            flex-shrink: 0;
         }
 
         .lang-btn {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
             border-radius: 15px;
             cursor: pointer;
@@ -105,6 +106,7 @@
             transition: all 0.3s ease;
             background: transparent;
             color: #5d4037;
+            white-space: nowrap;
         }
 
         .lang-btn.active {
@@ -394,7 +396,7 @@
         // Localized content
         const i18n = {
             ko: {
-                headerTitle: '러버덕 디버거',
+                headerTitle: '러버덕',
                 placeholder: '무엇이든 물어보세요! 🐤',
                 welcomeMessage: `
                     <h3>🐤 피-잇! 피-잇! 안녕하세요!</h3>
@@ -419,7 +421,7 @@
                 ]
             },
             en: {
-                headerTitle: 'Rubber Duck Debugger',
+                headerTitle: 'Rubber Duck',
                 placeholder: 'Ask me anything! 🐤',
                 welcomeMessage: `
                     <h3>🐤 Quack Quack! Hello there!</h3>
