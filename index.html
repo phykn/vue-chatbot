@@ -5,21 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>My AI Chatbot</title>
+    <title>🐤 Rubber Duck Debugger</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-bg: #ffffff;
-            --color-bubble-ai: #f2f4f7;
-            --color-bubble-user: #e3f2fd;
-            --color-text: #333;
-            --color-border: #eee;
-            --color-input-bg: #f8f9fa;
-            --color-input-focus: #4285f4;
+            --color-bg: #fffde7;
+            --color-bubble-ai: #fff9c4;
+            --color-bubble-user: #e1f5fe;
+            --color-text: #5d4037;
+            --color-border: #ffc107;
+            --color-input-bg: #ffffff;
+            --color-input-focus: #ffb300;
+            --color-accent: #ff9800;
             --font-family: 'Noto Sans KR', sans-serif;
-            --bubble-radius: 16px;
-            --input-radius: 20px;
+            --bubble-radius: 18px;
+            --input-radius: 24px;
             --max-width: 800px;
         }
 
@@ -47,7 +48,73 @@
             flex-direction: column;
             height: 100%;
             position: relative;
-            background-color: var(--color-bg);
+            background-color: #ffffff;
+        }
+
+        /* Header with Duck */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: #ffeb3b;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #5d4037;
+        }
+
+        .duck-icon {
+            font-size: 32px;
+            animation: wobble 2s infinite;
+        }
+
+        @keyframes wobble {
+
+            0%,
+            100% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        .lang-toggle {
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 5px;
+            border-radius: 20px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #5d4037;
+        }
+
+        .lang-btn.active {
+            background: #ff9800;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+        }
+
+        .lang-btn:hover:not(.active) {
+            background: rgba(255, 152, 0, 0.2);
         }
 
         .chat-container {
@@ -73,18 +140,31 @@
 
         .message-row {
             display: flex;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             width: 100%;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .bubble {
-            padding: 10px 14px;
+            padding: 12px 18px;
             border-radius: var(--bubble-radius);
             max-width: 85%;
-            line-height: 1.4;
+            line-height: 1.5;
             font-size: 15px;
             word-break: break-word;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
         .ai-row {
@@ -94,7 +174,17 @@
         .ai-row .bubble {
             background-color: var(--color-bubble-ai);
             color: var(--color-text);
-            border-top-left-radius: 4px;
+            border-top-left-radius: 6px;
+            border: 1px solid #ffe082;
+            position: relative;
+        }
+
+        .ai-row .bubble::before {
+            content: '🐤';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            font-size: 20px;
         }
 
         .user-row {
@@ -103,28 +193,35 @@
 
         .user-row .bubble {
             background-color: var(--color-bubble-user);
-            color: #000;
-            border-top-right-radius: 4px;
+            color: #0277bd;
+            border-top-right-radius: 6px;
+            border: 1px solid #b3e5fc;
         }
 
         .input-area {
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
-            border-top: 1px solid var(--color-border);
-            padding: 10px 15px;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            background-color: #ffffff;
+            border-top: 1px solid #eee;
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
             flex-shrink: 0;
         }
 
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .input-box {
-            width: 100%;
-            padding: 12px 15px;
+            flex: 1;
+            padding: 14px 20px;
             border-radius: var(--input-radius);
             border: 1px solid #ddd;
             background-color: var(--color-input-bg);
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s, background-color 0.3s;
+            transition: all 0.2s ease;
             -webkit-appearance: none;
             appearance: none;
             margin: 0;
@@ -132,16 +229,49 @@
 
         .input-box:focus {
             border-color: var(--color-input-focus);
-            background-color: var(--color-bg);
+            background-color: #fff;
+        }
+
+        .input-box::placeholder {
+            color: #a1887f;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background-color: #ffb300;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background-color: #ffa000;
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .loading span {
             display: inline-block;
-            width: 5px;
-            height: 5px;
-            background-color: #888;
+            width: 8px;
+            height: 8px;
+            background-color: #ffb300;
             border-radius: 50%;
-            margin: 0 2px;
+            margin: 0 3px;
             animation: bounce 1.4s infinite ease-in-out both;
         }
 
@@ -162,7 +292,55 @@
             }
 
             40% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Welcome message styling */
+        .welcome-bubble {
+            background-color: #fffde7 !important;
+            border: 1px dashed #ffb300 !important;
+        }
+
+        .welcome-bubble h3 {
+            margin: 0 0 10px 0;
+            color: #e65100;
+            font-size: 16px;
+        }
+
+        .welcome-bubble ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .welcome-bubble li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .welcome-bubble p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+        }
+
+        /* Quack animation */
+        .quack-animation {
+            animation: quack 0.5s ease-in-out;
+        }
+
+        @keyframes quack {
+
+            0%,
+            100% {
                 transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.1) rotate(-3deg);
+            }
+
+            75% {
+                transform: scale(1.1) rotate(3deg);
             }
         }
     </style>
@@ -170,10 +348,23 @@
 
 <body>
     <div id="app" ref="appContainer">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <span class="duck-icon">🐤</span>
+                <span>{{ headerTitle }}</span>
+            </div>
+            <div class="lang-toggle">
+                <button class="lang-btn" :class="{ active: lang === 'ko' }" @click="setLang('ko')">한국어</button>
+                <button class="lang-btn" :class="{ active: lang === 'en' }" @click="setLang('en')">English</button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
         <div class="chat-container" ref="chatWindow">
             <div v-for="(msg, index) in chatList" :key="index" class="message-row"
                 :class="getMessageRowClass(msg.type)">
-                <div class="bubble">{{ msg.text }}</div>
+                <div class="bubble" :class="{ 'welcome-bubble': msg.isWelcome }" v-html="msg.text"></div>
             </div>
             <div v-if="isLoading" class="message-row ai-row">
                 <div class="bubble loading">
@@ -181,9 +372,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Input Area -->
         <div class="input-area">
-            <input ref="chatInput" v-model="userInput" @keyup.enter="sendMessage" class="input-box" placeholder="메시지 입력"
-                :disabled="isLoading">
+            <div class="input-wrapper">
+                <input ref="chatInput" v-model="userInput" @keyup.enter="sendMessage" class="input-box"
+                    :placeholder="inputPlaceholder" :disabled="isLoading">
+                <button class="send-btn" @click="sendMessage" :disabled="isLoading || !userInput.trim()">
+                    🐤
+                </button>
+            </div>
         </div>
     </div>
 
@@ -191,23 +389,101 @@
         const { createApp } = Vue;
 
         const KEYBOARD_SCROLL_DELAY = 100;
-        const AI_RESPONSE_DELAY = 1000;
+        const AI_RESPONSE_DELAY = 800;
+
+        // Localized content
+        const i18n = {
+            ko: {
+                headerTitle: '러버덕 디버거',
+                placeholder: '무엇이든 물어보세요! 🐤',
+                welcomeMessage: `
+                    <h3>🐤 피-잇! 피-잇! 안녕하세요!</h3>
+                    <p>저는 당신의 <strong>러버덕 디버깅 친구</strong>예요!</p>
+                    <ul>
+                        <li>🔍 코딩하다 막힐 때 저에게 설명해보세요</li>
+                        <li>💡 문제를 말로 설명하면 해결책이 보일 거예요</li>
+                        <li>🎯 어떤 질문이든 편하게 해주세요</li>
+                        <li>🌍 오른쪽 위에서 언어를 바꿀 수 있어요</li>
+                    </ul>
+                    <p><em>무엇이든 물어보세요, 피-잇! 피-잇! 하고 대답해 드릴게요! 🐤</em></p>
+                `,
+                quacks: [
+                    '피-잇! 피-잇! 🐤 좋은 질문이에요!',
+                    '피-잇! 피-잇! 🐤 네, 듣고 있어요!',
+                    '피-잇! 피-잇! 🐤 계속 설명해 보세요!',
+                    '피-잇! 피-잇! 🐤 그렇군요, 더 자세히 알려주세요!',
+                    '피-잇! 피-잇! 🐤 흥미로운 문제네요!',
+                    '피-잇! 피-잇! 🐤 문제가 뭔지 이제 보이시나요?',
+                    '피-잇! 피잇! 🐤 천천히 다시 생각해보세요!',
+                    '피-잇! 피-잇! 🐤 그 부분을 조금 더 풀어볼까요?'
+                ]
+            },
+            en: {
+                headerTitle: 'Rubber Duck Debugger',
+                placeholder: 'Ask me anything! 🐤',
+                welcomeMessage: `
+                    <h3>🐤 Quack Quack! Hello there!</h3>
+                    <p>I'm your <strong>Rubber Duck Debugging buddy</strong>!</p>
+                    <ul>
+                        <li>🔍 When you're stuck coding, explain it to me</li>
+                        <li>💡 Speaking your problem out loud helps find solutions</li>
+                        <li>🎯 Feel free to ask me anything</li>
+                        <li>🌍 You can change language in the top right</li>
+                    </ul>
+                    <p><em>Ask me anything and I'll quack back! 🐤</em></p>
+                `,
+                quacks: [
+                    'Quack quack! 🐤 Great question!',
+                    'Quack quack! 🐤 I\'m listening!',
+                    'Quack quack! 🐤 Keep explaining!',
+                    'Quack quack! 🐤 Tell me more about that!',
+                    'Quack quack! 🐤 That\'s an interesting problem!',
+                    'Quack quack! 🐤 Do you see the issue now?',
+                    'Quack quack! 🐤 Let\'s think through this slowly!',
+                    'Quack quack! 🐤 Want to break that down more?'
+                ]
+            }
+        };
 
         createApp({
             data() {
                 return {
                     userInput: '',
-                    chatList: [{ text: '안녕하세요!', type: 'assistant' }],
+                    chatList: [],
                     isLoading: false,
-                    previousViewportHeight: 0
+                    previousViewportHeight: 0,
+                    lang: 'ko'
                 };
+            },
+
+            computed: {
+                headerTitle() {
+                    return i18n[this.lang].headerTitle;
+                },
+                inputPlaceholder() {
+                    return i18n[this.lang].placeholder;
+                }
             },
 
             mounted() {
                 this.initViewportHandler();
+                this.showWelcomeMessage();
             },
 
             methods: {
+                setLang(newLang) {
+                    this.lang = newLang;
+                    document.documentElement.lang = newLang;
+                },
+
+                showWelcomeMessage() {
+                    this.chatList = [{
+                        text: i18n[this.lang].welcomeMessage,
+                        type: 'assistant',
+                        isWelcome: true
+                    }];
+                },
+
                 initViewportHandler() {
                     if (!window.visualViewport) return;
 
@@ -244,16 +520,21 @@
                     this.isLoading = true;
                     this.focusInput();
 
-                    this.simulateAIResponse(trimmedInput);
+                    this.simulateAIResponse();
                 },
 
-                addMessage(text, type) {
-                    this.chatList.push({ text, type });
+                addMessage(text, type, isWelcome = false) {
+                    this.chatList.push({ text, type, isWelcome });
                 },
 
-                simulateAIResponse(userText) {
+                getRandomQuack() {
+                    const quacks = i18n[this.lang].quacks;
+                    return quacks[Math.floor(Math.random() * quacks.length)];
+                },
+
+                simulateAIResponse() {
                     setTimeout(() => {
-                        this.addMessage(userText, 'assistant');
+                        this.addMessage(this.getRandomQuack(), 'assistant');
                         this.isLoading = false;
                         this.scrollToBottom();
                         this.focusInput();
@@ -281,3 +562,5 @@
 </body>
 
 </html>
+</CodeContent>
+<parameter name="EmptyFile">false
