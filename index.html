@@ -44,13 +44,6 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
             overscroll-behavior: contain;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        .chat-container>* {
-            flex-shrink: 0;
         }
 
         .chat-container::-webkit-scrollbar {
@@ -193,7 +186,18 @@
 
                         if (isKeyboardOpening) {
                             this.$nextTick(() => {
-                                this.scrollToBottom(true);
+                                const container = this.$refs.chatWindow;
+                                const lastMessage = container.querySelector('.message-row:last-of-type');
+
+                                if (lastMessage) {
+                                    const lastMessageRect = lastMessage.getBoundingClientRect();
+                                    const containerRect = container.getBoundingClientRect();
+
+                                    // 마지막 메시지가 컨테이너 하단 밖에 있으면 (가려지면) 스크롤
+                                    if (lastMessageRect.bottom > containerRect.bottom) {
+                                        this.scrollToBottom(true);
+                                    }
+                                }
                             });
                         }
 
