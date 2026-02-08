@@ -376,7 +376,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="version-info">v1.0.1</div>
+            <div class="version-info">v1.0.2</div>
         </div>
     </div>
 
@@ -456,8 +456,10 @@
             },
 
             mounted() {
-                this.initViewportHandler();
                 this.showWelcomeMessage();
+                this.$nextTick(() => {
+                    this.initViewportHandler();
+                });
             },
 
             methods: {
@@ -483,14 +485,25 @@
 
                 initViewportHandler() {
                     if (!window.visualViewport) return;
+                    if (!this.$refs.appContainer) return;
+
                     this.previousViewportHeight = window.visualViewport.height;
                     this.$refs.appContainer.style.height = `${this.previousViewportHeight}px`;
-                    window.visualViewport.addEventListener('resize', this.handleViewportResize);
-                    window.visualViewport.addEventListener('scroll', this.handleViewportScroll);
+
+                    window.visualViewport.addEventListener('resize', () => this.handleViewportResize());
+                    window.visualViewport.addEventListener('scroll', () => this.handleViewportScroll());
+
+                    this.$refs.chatInput.addEventListener('focus', () => {
+                        setTimeout(() => this.scrollToBottom(true), 100);
+                        setTimeout(() => this.scrollToBottom(true), 300);
+                        setTimeout(() => this.scrollToBottom(true), 500);
+                    });
                 },
 
                 handleViewportResize() {
                     const vv = window.visualViewport;
+                    if (!vv || !this.$refs.appContainer) return;
+
                     const currentHeight = vv.height;
 
                     this.$refs.appContainer.style.height = `${currentHeight}px`;
@@ -499,10 +512,7 @@
                     document.body.scrollTop = 0;
                     document.documentElement.scrollTop = 0;
 
-                    requestAnimationFrame(() => {
-                        this.scrollToBottom(true);
-                    });
-
+                    this.scrollToBottom(true);
                     setTimeout(() => this.scrollToBottom(true), 50);
                     setTimeout(() => this.scrollToBottom(true), 150);
                     setTimeout(() => this.scrollToBottom(true), 300);
@@ -512,6 +522,7 @@
 
                 handleViewportScroll() {
                     const vv = window.visualViewport;
+                    if (!vv || !this.$refs.appContainer) return;
                     this.$refs.appContainer.style.transform = `translateY(${vv.offsetTop}px)`;
                 },
 
