@@ -44,6 +44,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
             overscroll-behavior: contain;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .chat-container>* {
+            flex-shrink: 0;
         }
 
         .chat-container::-webkit-scrollbar {
