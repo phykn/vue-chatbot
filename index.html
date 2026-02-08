@@ -9,6 +9,20 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-bg: #ffffff;
+            --color-bubble-ai: #f2f4f7;
+            --color-bubble-user: #e3f2fd;
+            --color-text: #333;
+            --color-border: #eee;
+            --color-input-bg: #f8f9fa;
+            --color-input-focus: #4285f4;
+            --font-family: 'Noto Sans KR', sans-serif;
+            --bubble-radius: 16px;
+            --input-radius: 20px;
+            --max-width: 800px;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -20,20 +34,20 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #ffffff;
-            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--color-bg);
+            font-family: var(--font-family);
             position: fixed;
         }
 
         #app {
             width: 100%;
-            max-width: 800px;
+            max-width: var(--max-width);
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             height: 100%;
             position: relative;
-            background-color: #fff;
+            background-color: var(--color-bg);
         }
 
         .chat-container {
@@ -44,6 +58,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
             overscroll-behavior: contain;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .chat-container>* {
+            flex-shrink: 0;
         }
 
         .chat-container::-webkit-scrollbar {
@@ -58,7 +79,7 @@
 
         .bubble {
             padding: 10px 14px;
-            border-radius: 16px;
+            border-radius: var(--bubble-radius);
             max-width: 85%;
             line-height: 1.4;
             font-size: 15px;
@@ -71,8 +92,8 @@
         }
 
         .ai-row .bubble {
-            background-color: #f2f4f7;
-            color: #333;
+            background-color: var(--color-bubble-ai);
+            color: var(--color-text);
             border-top-left-radius: 4px;
         }
 
@@ -81,7 +102,7 @@
         }
 
         .user-row .bubble {
-            background-color: #e3f2fd;
+            background-color: var(--color-bubble-user);
             color: #000;
             border-top-right-radius: 4px;
         }
@@ -89,7 +110,7 @@
         .input-area {
             width: 100%;
             background-color: rgba(255, 255, 255, 0.95);
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--color-border);
             padding: 10px 15px;
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
             flex-shrink: 0;
@@ -98,20 +119,20 @@
         .input-box {
             width: 100%;
             padding: 12px 15px;
-            border-radius: 20px;
+            border-radius: var(--input-radius);
             border: 1px solid #ddd;
-            background-color: #f8f9fa;
+            background-color: var(--color-input-bg);
             font-size: 16px;
             outline: none;
-            transition: 0.3s;
+            transition: border-color 0.3s, background-color 0.3s;
             -webkit-appearance: none;
             appearance: none;
             margin: 0;
         }
 
         .input-box:focus {
-            border-color: #4285f4;
-            background-color: #fff;
+            border-color: var(--color-input-focus);
+            background-color: var(--color-bg);
         }
 
         .loading span {
@@ -151,11 +172,13 @@
     <div id="app" ref="appContainer">
         <div class="chat-container" ref="chatWindow">
             <div v-for="(msg, index) in chatList" :key="index" class="message-row"
-                :class="msg.type === 'user' ? 'user-row' : 'ai-row'">
+                :class="getMessageRowClass(msg.type)">
                 <div class="bubble">{{ msg.text }}</div>
             </div>
             <div v-if="isLoading" class="message-row ai-row">
-                <div class="bubble loading"><span></span><span></span><span></span></div>
+                <div class="bubble loading">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
         </div>
         <div class="input-area">
@@ -163,83 +186,97 @@
                 :disabled="isLoading">
         </div>
     </div>
+
     <script>
-        const { createApp } = Vue
+        const { createApp } = Vue;
+
+        const KEYBOARD_SCROLL_DELAY = 100;
+        const AI_RESPONSE_DELAY = 300;
+
         createApp({
             data() {
                 return {
                     userInput: '',
                     chatList: [{ text: '안녕하세요!', type: 'assistant' }],
-                    isLoading: false
-                }
+                    isLoading: false,
+                    previousViewportHeight: 0
+                };
             },
+
             mounted() {
-                if (window.visualViewport) {
-                    let previousHeight = window.visualViewport.height;
-
-                    window.visualViewport.addEventListener('resize', () => {
-                        const currentHeight = window.visualViewport.height;
-                        const isKeyboardOpening = currentHeight < previousHeight;
-
-                        this.$refs.appContainer.style.height = `${currentHeight}px`;
-                        window.scrollTo(0, 0);
-
-                        if (isKeyboardOpening) {
-                            setTimeout(() => {
-                                requestAnimationFrame(() => {
-                                    const container = this.$refs.chatWindow;
-                                    const lastMessage = container.querySelector('.message-row:last-of-type');
-
-                                    if (lastMessage) {
-                                        const lastMessageRect = lastMessage.getBoundingClientRect();
-                                        const containerRect = container.getBoundingClientRect();
-
-                                        if (lastMessageRect.bottom > containerRect.bottom) {
-                                            this.scrollToBottom(true);
-                                        }
-                                    }
-                                });
-                            }, 100);
-                        }
-
-                        previousHeight = currentHeight;
-                    });
-                }
+                this.initViewportHandler();
             },
+
             methods: {
+                initViewportHandler() {
+                    if (!window.visualViewport) return;
+
+                    this.previousViewportHeight = window.visualViewport.height;
+
+                    window.visualViewport.addEventListener('resize', this.handleViewportResize);
+                },
+
+                handleViewportResize() {
+                    const currentHeight = window.visualViewport.height;
+                    const isKeyboardOpening = currentHeight < this.previousViewportHeight;
+
+                    this.$refs.appContainer.style.height = `${currentHeight}px`;
+                    window.scrollTo(0, 0);
+
+                    if (isKeyboardOpening) {
+                        setTimeout(() => this.scrollToBottom(true), KEYBOARD_SCROLL_DELAY);
+                    }
+
+                    this.previousViewportHeight = currentHeight;
+                },
+
+                getMessageRowClass(type) {
+                    return type === 'user' ? 'user-row' : 'ai-row';
+                },
+
                 sendMessage() {
-                    if (this.userInput.trim() === '' || this.isLoading) return;
-                    const userText = this.userInput;
-                    this.chatList.push({ text: userText, type: 'user' });
+                    const trimmedInput = this.userInput.trim();
+                    if (!trimmedInput || this.isLoading) return;
+
+                    this.addMessage(trimmedInput, 'user');
                     this.userInput = '';
                     this.scrollToBottom();
                     this.isLoading = true;
+                    this.focusInput();
 
-                    this.$nextTick(() => {
-                        this.$refs.chatInput.focus();
-                    });
+                    this.simulateAIResponse(trimmedInput);
+                },
 
+                addMessage(text, type) {
+                    this.chatList.push({ text, type });
+                },
+
+                simulateAIResponse(userText) {
                     setTimeout(() => {
-                        this.chatList.push({ text: userText, type: 'assistant' });
+                        this.addMessage(userText, 'assistant');
                         this.isLoading = false;
                         this.scrollToBottom();
-                        this.$nextTick(() => {
-                            this.$refs.chatInput.focus();
-                        });
-                    }, 300);
+                        this.focusInput();
+                    }, AI_RESPONSE_DELAY);
+                },
+
+                focusInput() {
+                    this.$nextTick(() => {
+                        this.$refs.chatInput?.focus();
+                    });
                 },
 
                 scrollToBottom(instant = false) {
                     this.$nextTick(() => {
                         const container = this.$refs.chatWindow;
-                        container.scrollTo({
+                        container?.scrollTo({
                             top: container.scrollHeight,
                             behavior: instant ? 'auto' : 'smooth'
                         });
                     });
                 }
             }
-        }).mount('#app')
+        }).mount('#app');
     </script>
 </body>
 
