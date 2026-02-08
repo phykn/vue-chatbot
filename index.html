@@ -185,20 +185,22 @@
                         window.scrollTo(0, 0);
 
                         if (isKeyboardOpening) {
-                            this.$nextTick(() => {
-                                const container = this.$refs.chatWindow;
-                                const lastMessage = container.querySelector('.message-row:last-of-type');
+                            setTimeout(() => {
+                                requestAnimationFrame(() => {
+                                    const container = this.$refs.chatWindow;
+                                    const lastMessage = container.querySelector('.message-row:last-of-type');
 
-                                if (lastMessage) {
-                                    const lastMessageRect = lastMessage.getBoundingClientRect();
-                                    const containerRect = container.getBoundingClientRect();
+                                    if (lastMessage) {
+                                        const lastMessageRect = lastMessage.getBoundingClientRect();
+                                        const containerRect = container.getBoundingClientRect();
 
-                                    // 마지막 메시지가 컨테이너 하단 밖에 있으면 (가려지면) 스크롤
-                                    if (lastMessageRect.bottom > containerRect.bottom) {
-                                        this.scrollToBottom(true);
+                                        // 마지막 메시지가 컨테이너 하단 밖에 있으면 (가려지면) 스크롤
+                                        if (lastMessageRect.bottom > containerRect.bottom) {
+                                            this.scrollToBottom(true);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }, 100);
                         }
 
                         previousHeight = currentHeight;
